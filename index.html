@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Универсальный Магазин Доставки</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .category-btn.active { background-color: #059669; color: white; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-green-600">Магазин "Рабия"</h1>
+            <div class="relative cursor-pointer" onclick="toggleCart()">
+                <span class="text-2xl">🛒</span>
+                <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-wrap gap-2 mb-8" id="categories">
+            <button class="category-btn active px-4 py-2 rounded-full bg-white shadow" onclick="filterProducts('all')">Все</button>
+            <button class="category-btn px-4 py-2 rounded-full bg-white shadow" onclick="filterProducts('food')">Овощи/Фрукты</button>
+            <button class="category-btn px-4 py-2 rounded-full bg-white shadow" onclick="filterProducts('dairy')">Молочка/Хлеб</button>
+            <button class="category-btn px-4 py-2 rounded-full bg-white shadow" onclick="filterProducts('household')">Моющие/Игрушки</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" id="product-grid">
+            </div>
+    </div>
+
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[100]">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 class="text-xl font-bold mb-4">Ваш заказ</h2>
+            <div id="cart-items" class="max-height-[300px] overflow-y-auto mb-4 text-sm"></div>
+            <hr class="mb-4">
+            <div class="flex justify-between font-bold text-lg mb-4">
+                <span>Итого:</span>
+                <span id="total-price">0 руб.</span>
+            </div>
+            <button onclick="pay()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">Перейти к оплате</button>
+            <button onclick="toggleCart()" class="w-full mt-2 text-gray-500">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { id: 1, name: "Яблоки Гала", price: 120, cat: "food", img: "🍎" },
+            { id: 2, name: "Томаты Черри", price: 250, cat: "food", img: "🍅" },
+            { id: 3, name: "Молоко 3.2%", price: 89, cat: "dairy", img: "🥛" },
+            { id: 4, name: "Хлеб Бородинский", price: 55, cat: "dairy", img: "🍞" },
+            { id: 5, name: "Средство для посуды", price: 180, cat: "household", img: "🧼" },
+            { id: 6, name: "Плюшевый мишка", price: 950, cat: "household", img: "🧸" },
+        ];
+
+        let cart = [];
+
+        function renderProducts(filter = 'all') {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            products.filter(p => filter === 'all' || p.cat === filter).forEach(p => {
+                grid.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition">
+                        <div class="text-6xl mb-4 text-center">${p.img}</div>
+                        <h3 class="font-bold text-lg">${p.name}</h3>
+                        <p class="text-gray-500 mb-4">${p.price} руб.</p>
+                        <button onclick="addToCart(${p.id})" class="w-full border border-green-600 text-green-600 py-2 rounded-lg hover:bg-green-50">Добавить</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addToCart(id) {
+            const item = products.find(p => p.id === id);
+            cart.push(item);
+            updateCart();
+        }
+
+        function updateCart() {
+            const badge = document.getElementById('cart-badge');
+            badge.innerText = cart.length;
+            badge.classList.toggle('hidden', cart.length === 0);
+            
+            const itemsDiv = document.getElementById('cart-items');
+            itemsDiv.innerHTML = cart.map(item => `<div class="flex justify-between py-1 border-b"><span>${item.name}</span><span>${item.price} ₽</span></div>`).join('');
+            
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('total-price').innerText = total + " руб.";
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-modal').classList.toggle('hidden');
+        }
+
+        function filterProducts(cat) {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active', 'bg-green-600', 'text-white'));
+            event.target.classList.add('active', 'bg-green-600', 'text-white');
+            renderProducts(cat);
+        }
+
+        function pay() {
+            alert("Для самозанятых: Сейчас произойдет переход на платежную страницу ЮKassa или Robokassa.");
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
